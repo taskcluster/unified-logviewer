@@ -149,7 +149,8 @@ export default class LogViewer extends React.Component {
 
   renderChunk(height, index, shouldLoad) {
     const load = shouldLoad(index);
-    const { worker } = this.state;
+    const { worker, highlightStart, highlightEnd } = this.state;
+    const metadata = { highlightStart, highlightEnd };
 
     return (
       <LazyItem key={index} load={load} style={{ minHeight: height }}>
@@ -165,7 +166,7 @@ export default class LogViewer extends React.Component {
             };
 
             worker.addEventListener('message', handler);
-            worker.postMessage(JSON.stringify({ type: 'decode-index', index }));
+            worker.postMessage(JSON.stringify({ type: 'decode-index', index, metadata }));
           });
         }}
       </LazyItem>
