@@ -130,7 +130,7 @@ const loadEnd = () => self.postMessage(JSON.stringify({ type: 'loadend' }));
 
 const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
   return lineNumber >= highlightStart && lineNumber <= highlightEnd ?
-    'class="highlight"' :
+    ' class="highlight"' :
     '';
 };
 
@@ -142,7 +142,7 @@ const toHtml = (index, metadata) => {
     const lineNumber = start + index;
     const pClass = getParagraphClass(lineNumber, metadata);
 
-    return `<p ${pClass}><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
+    return `<p${pClass}><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
       const className = getAnsiClasses(part);
       
       return className ?
