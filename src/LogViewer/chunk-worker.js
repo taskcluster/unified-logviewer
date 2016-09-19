@@ -128,10 +128,10 @@ const update = (response) => {
 const error = () => self.postMessage(JSON.stringify({ type: 'error' }));
 const loadEnd = () => self.postMessage(JSON.stringify({ type: 'loadend' }));
 
-const getParagraphClass = (lineNumber, metadata) => {
-  const { highlightStart, highlightEnd } = metadata;
-
-  return lineNumber >= highlightStart && lineNumber <= highlightEnd ? 'highlight' : '';
+const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
+  return lineNumber >= highlightStart && lineNumber <= highlightEnd ?
+    'class="highlight"' :
+    '';
 };
 
 const toHtml = (index, metadata) => {
@@ -142,7 +142,7 @@ const toHtml = (index, metadata) => {
     const lineNumber = start + index;
     const pClass = getParagraphClass(lineNumber, metadata);
 
-    return `<p class="${pClass}"><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
+    return `<p ${pClass}><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
       const className = getAnsiClasses(part);
       
       return className ?
