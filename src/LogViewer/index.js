@@ -23,6 +23,7 @@ export default class LogViewer extends React.Component {
       showLineNumbers: qs.showLineNumbers !== 'false',
       isLoading: true,
       chunkHeights: [],
+      offset: 0,
       error: false,
       toolbarOpen: false,
     };
@@ -59,7 +60,20 @@ export default class LogViewer extends React.Component {
   }
 
   componentDidMount() {
-    this.request();
+    const { highlightStart } = this.state;
+
+    this.request() || (highlightStart && this.jump(highlightStart));
+  }
+
+  jump(lineNumber) {
+    const timer = setInterval(() => {
+      const elem = document.getElementById(lineNumber);
+
+      if (elem) {
+        elem.scrollIntoView();
+        clearInterval(timer);
+      }
+    }, 1000);
   }
 
   request() {
@@ -93,8 +107,8 @@ export default class LogViewer extends React.Component {
     }
   }
 
-  handleContainerUpdate({ chunkHeights }) {
-    this.setState({ chunkHeights, isLoading: false });
+  handleContainerUpdate({ offset, chunkHeights }) {
+    this.setState({ offset, chunkHeights, isLoading: false });
   }
 
   handleDelegation(event) {
@@ -177,8 +191,10 @@ export default class LogViewer extends React.Component {
   }
 
   renderChunks() {
+    const { highlightStart, offset } = this.state;
+
     return (
-      <LazyList list={this.state.chunkHeights} buffer={2}>
+      <LazyList list={this.state.chunkHeights} buffer={2} metadata={{highlightStart, offset}}>
         {(heights, shouldLoad) => heights.map((height, index) => this.renderChunk(height, index, shouldLoad))}
       </LazyList>
     );
