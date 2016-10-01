@@ -58,10 +58,10 @@ export default class LazyList extends React.Component {
   }
 
   handleLineJump() {
-    const { highlightStart, offset } = this.props.metadata;
+    const { highlightStart, offset, LINE_CHUNK } = this.props.metadata;
 
     return new Promise((resolve) => {
-      this.setState({ jumpToLine: Math.floor((highlightStart - (offset + 1)) / 1000) }, () => resolve());
+      this.setState({ jumpToLine: Math.floor((highlightStart - (offset + 1)) / LINE_CHUNK) }, () => resolve());
     });
   }
 

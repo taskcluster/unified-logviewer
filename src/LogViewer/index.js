@@ -24,6 +24,7 @@ export default class LogViewer extends React.Component {
       isLoading: true,
       chunkHeights: [],
       offset: 0,
+      LINE_CHUNK: 0,
       error: false,
       toolbarOpen: false,
     };
@@ -107,8 +108,8 @@ export default class LogViewer extends React.Component {
     }
   }
 
-  handleContainerUpdate({ offset, chunkHeights }) {
-    this.setState({ offset, chunkHeights, isLoading: false });
+  handleContainerUpdate({ offset, chunkHeights, LINE_CHUNK }) {
+    this.setState({ offset, chunkHeights, LINE_CHUNK, isLoading: false });
   }
 
   handleDelegation(event) {
@@ -191,10 +192,10 @@ export default class LogViewer extends React.Component {
   }
 
   renderChunks() {
-    const { highlightStart, offset } = this.state;
+    const { highlightStart, offset, LINE_CHUNK } = this.state;
 
     return (
-      <LazyList list={this.state.chunkHeights} buffer={2} metadata={{highlightStart, offset}}>
+      <LazyList list={this.state.chunkHeights} buffer={2} metadata={{highlightStart, offset, LINE_CHUNK}}>
         {(heights, shouldLoad) => heights.map((height, index) => this.renderChunk(height, index, shouldLoad))}
       </LazyList>
     );
