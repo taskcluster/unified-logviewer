@@ -14,5 +14,5 @@ $ npm install
 
 ## Example
 ```
-localhost:4000/?url=http://public-artifacts.taskcluster.net/5qB6Zqc0Tw2_wkKwHgGNGQ/0/public/logs/live_backing.log
+http://localhost:4000/?url=https://public-artifacts.taskcluster.net/5qB6Zqc0Tw2_wkKwHgGNGQ/0/public/logs/live_backing.log
 ```
