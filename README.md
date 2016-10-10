@@ -2,8 +2,9 @@
 A service to view logs in real time
 
 ## Building
+Fork the repository then run the following commands:
 ```
-$ git clone https://github.com/taskcluster/unified-logviewer.git
+$ git clone http://github.com/<user>/unified-logviewer.git
 $ cd unified-logviewer
 $ npm install
 ```
