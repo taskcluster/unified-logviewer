@@ -24,7 +24,8 @@ export default class LogViewer extends React.Component {
       isLoading: true,
       chunkHeights: [],
       offset: 0,
-      LINE_CHUNK: 0,
+      lineChunk: 0,
+      minLineHeight: 0,
       error: false,
       toolbarOpen: false,
     };
@@ -63,18 +64,7 @@ export default class LogViewer extends React.Component {
   componentDidMount() {
     const { highlightStart } = this.state;
 
-    this.request() || (highlightStart && this.jump(highlightStart));
-  }
-
-  jump(lineNumber) {
-    const timer = setInterval(() => {
-      const elem = document.getElementById(lineNumber);
-
-      if (elem) {
-        elem.scrollIntoView();
-        clearInterval(timer);
-      }
-    }, 1000);
+    this.request() || (highlightStart && this.jumpToHighlight(highlightStart));
   }
 
   request() {
@@ -108,8 +98,8 @@ export default class LogViewer extends React.Component {
     }
   }
 
-  handleContainerUpdate({ offset, chunkHeights, LINE_CHUNK }) {
-    this.setState({ offset, chunkHeights, LINE_CHUNK, isLoading: false });
+  handleContainerUpdate({ offset, chunkHeights, lineChunk, minLineHeight }) {
+    this.setState({ offset, chunkHeights, lineChunk, minLineHeight, isLoading: false });
   }
 
   handleDelegation(event) {
@@ -192,13 +182,28 @@ export default class LogViewer extends React.Component {
   }
 
   renderChunks() {
-    const { highlightStart, offset, LINE_CHUNK } = this.state;
-
     return (
-      <LazyList list={this.state.chunkHeights} buffer={2} metadata={{highlightStart, offset, LINE_CHUNK}}>
+      <LazyList
+        list={this.state.chunkHeights}
+        buffer={2}>
         {(heights, shouldLoad) => heights.map((height, index) => this.renderChunk(height, index, shouldLoad))}
       </LazyList>
     );
+  }
+
+  jumpToLine(lineNumber) {
+    const { minLineHeight, offset } = this.state;
+
+    window.scrollTo(0, (lineNumber - offset) * minLineHeight + minLineHeight);
+  }
+
+  jumpToHighlight(lineNumber) {
+    const interval = setInterval(() => {
+      if (this.state.minLineHeight) {
+        this.jumpToLine(lineNumber);
+        clearInterval(interval);
+      }
+    }, 1000);
   }
 
   render() {

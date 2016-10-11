@@ -115,7 +115,10 @@ const update = (response) => {
     lineCounts = lineCounts.slice(overage);
   }
 
-  self.postMessage(JSON.stringify({ type: 'update', chunkHeights, offset, LINE_CHUNK }));
+  self.postMessage(JSON.stringify({
+    type: 'update', chunkHeights, offset,
+    lineChunk: LINE_CHUNK, minLineHeight: MIN_LINE_HEIGHT
+  }));
 };
 
 const error = () => self.postMessage(JSON.stringify({ type: 'error' }));

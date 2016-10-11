@@ -15,8 +15,7 @@ export default class LazyList extends React.Component {
     super(props);
 
     this.state = {
-      renderIndices: Range(0, 0),
-      jumpToLine: 0
+      renderIndices: Range(0, 0)
     };
 
     this.handleScroll = throttle(::this.handleScroll, 300);
@@ -37,17 +36,13 @@ export default class LazyList extends React.Component {
   }
 
   componentDidMount() {
-    this.handleLineJump().then(() => {
-      this.handleScroll();
-      this.setState({ jumpToLine: null });
-    });
+    this.handleScroll();
   }
 
   handleScroll() {
     const buffer = this.props.buffer;
     const percent = getScrollPercent();
-    const { jumpToLine } = this.state;
-    const index = jumpToLine ? jumpToLine : Math.floor((this.props.list.length - 1) * percent);
+    const index = Math.floor((this.props.list.length - 1) * percent);
     const start = Math.max(0, index - buffer);
     const end = Math.min(this.props.list.length, index + buffer + 1);
     const range = Range(start, end);
@@ -55,14 +50,6 @@ export default class LazyList extends React.Component {
     if (!range.equals(this.state.renderIndices)) {
       this.setState({ renderIndices: range });
     }
-  }
-
-  handleLineJump() {
-    const { highlightStart, offset, LINE_CHUNK } = this.props.metadata;
-
-    return new Promise((resolve) => {
-      this.setState({ jumpToLine: Math.floor((highlightStart - (offset + 1)) / LINE_CHUNK) }, () => resolve());
-    });
   }
 
   handleUnload() {
