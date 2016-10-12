@@ -49,6 +49,7 @@ export default class LogViewer extends React.Component {
       url: nextState.url,
       highlightStart: nextState.highlightStart,
       highlightEnd: nextState.highlightEnd,
+      lineNumber: nextState.lineNumber,
       wrapLines: nextState.wrapLines,
       showLineNumbers: nextState.showLineNumbers
     });
@@ -61,9 +62,9 @@ export default class LogViewer extends React.Component {
   }
 
   componentDidMount() {
-    const { highlightStart } = this.state;
+    const { lineNumber } = this.state;
 
-    this.request() || (highlightStart && this.jumpToHighlight(highlightStart));
+    this.request() || (lineNumber && this.jumpToQueriedLine(lineNumber));
   }
 
   request() {
@@ -182,9 +183,7 @@ export default class LogViewer extends React.Component {
 
   renderChunks() {
     return (
-      <LazyList
-        list={this.state.chunkHeights}
-        buffer={2}>
+      <LazyList list={this.state.chunkHeights} buffer={2}>
         {(heights, shouldLoad) => heights.map((height, index) => this.renderChunk(height, index, shouldLoad))}
       </LazyList>
     );
@@ -196,7 +195,7 @@ export default class LogViewer extends React.Component {
     window.scrollTo(0, (lineNumber - offset) * minLineHeight + minLineHeight);
   }
 
-  jumpToHighlight(lineNumber) {
+  jumpToQueriedLine(lineNumber) {
     const interval = setInterval(() => {
       if (this.state.minLineHeight) {
         this.jumpToLine(lineNumber);
