@@ -24,7 +24,6 @@ export default class LogViewer extends React.Component {
       isLoading: true,
       chunkHeights: [],
       offset: 0,
-      lineChunk: 0,
       minLineHeight: 0,
       error: false,
       toolbarOpen: false,
@@ -98,8 +97,8 @@ export default class LogViewer extends React.Component {
     }
   }
 
-  handleContainerUpdate({ offset, chunkHeights, lineChunk, minLineHeight }) {
-    this.setState({ offset, chunkHeights, lineChunk, minLineHeight, isLoading: false });
+  handleContainerUpdate({ offset, chunkHeights, minLineHeight }) {
+    this.setState({ offset, chunkHeights, minLineHeight, isLoading: false });
   }
 
   handleDelegation(event) {
