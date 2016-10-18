@@ -10,6 +10,39 @@ const LINE_CHUNK = 1000;
 const DECODER = new TextDecoder('utf-8');
 // Setting a hard limit on lines since browser have trouble with heights starting at around 16.7 million pixels and up
 const CHUNK_LIMIT = 883000 / LINE_CHUNK;
+// HTML Escape helper utility
+const util = (() => {
+  // Thanks to Andrea Giammarchi
+  const reEscape = /[&<>'"]/g;
+  const reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
+  const oEscape = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  };
+  const oUnescape = {
+    '&amp;': '&',
+    '&#38;': '&',
+    '&lt;': '<',
+    '&#60;': '<',
+    '&gt;': '>',
+    '&#62;': '>',
+    '&apos;': "'",
+    '&#39;': "'",
+    '&quot;': '"',
+    '&#34;': '"'
+  };
+  const fnEscape = (m) => oEscape[m];
+  const fnUnescape = (m) => oUnescape[m];
+  const replace = String.prototype.replace;
+
+  return (Object.freeze || Object)({
+    escape: (s) => replace.call(s, reEscape, fnEscape),
+    unescape: (s) => replace.call(s, reUnescape, fnUnescape)
+  });
+})();
 
 let buffer = new Uint8Array(0);
 let offset = 0;
@@ -127,6 +160,18 @@ const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
     '';
 };
 
+// Tagged template function
+function escapeHtml(pieces) {
+  let result = pieces[0];
+  const substitutions = [].slice.call(arguments, 1);
+
+  substitutions.forEach((elem, i) => {
+    result += util.escape(elem) + pieces[i + 1];
+  });
+
+  return result;
+}
+
 const toHtml = (index, metadata) => {
   const lines = decode(chunks[index]);
   const start = LINE_CHUNK * index + offset + 1;
@@ -139,8 +184,8 @@ const toHtml = (index, metadata) => {
       const className = getAnsiClasses(part);
       
       return className ?
-        `<span class="${className}">${part.text}</span>` :
-        `<span>${part.text}</span>`;
+        escapeHtml`<span class="${className}">${part.text}</span>` :
+        escapeHtml`<span>${part.text}</span>`;
       }).join('')}</p>`;
   }).join('');
 
