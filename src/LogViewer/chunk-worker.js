@@ -12,9 +12,7 @@ const DECODER = new TextDecoder('utf-8');
 const CHUNK_LIMIT = 883000 / LINE_CHUNK;
 // HTML Escape helper utility
 const util = (() => {
-  // Thanks to Andrea Giammarchi
   const reEscape = /[&<>'"]/g;
-  const reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
   const oEscape = {
     '&': '&amp;',
     '<': '&lt;',
@@ -22,25 +20,10 @@ const util = (() => {
     "'": '&#39;',
     '"': '&quot;'
   };
-  const oUnescape = {
-    '&amp;': '&',
-    '&#38;': '&',
-    '&lt;': '<',
-    '&#60;': '<',
-    '&gt;': '>',
-    '&#62;': '>',
-    '&apos;': "'",
-    '&#39;': "'",
-    '&quot;': '"',
-    '&#34;': '"'
-  };
   const fnEscape = (m) => oEscape[m];
-  const fnUnescape = (m) => oUnescape[m];
-  const replace = String.prototype.replace;
 
   return (Object.freeze || Object)({
-    escape: (s) => replace.call(s, reEscape, fnEscape),
-    unescape: (s) => replace.call(s, reUnescape, fnUnescape)
+    escape: (s) => String.prototype.replace.call(s, reEscape, fnEscape)
   });
 })();
 
