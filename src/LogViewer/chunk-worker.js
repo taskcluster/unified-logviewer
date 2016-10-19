@@ -10,22 +10,16 @@ const LINE_CHUNK = 1000;
 const DECODER = new TextDecoder('utf-8');
 // Setting a hard limit on lines since browser have trouble with heights starting at around 16.7 million pixels and up
 const CHUNK_LIMIT = 883000 / LINE_CHUNK;
-// HTML Escape helper utility
-const util = (() => {
-  const reEscape = /[&<>'"]/g;
-  const oEscape = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#39;',
-    '"': '&quot;'
-  };
-  const fnEscape = (m) => oEscape[m];
-
-  return (Object.freeze || Object)({
-    escape: (s) => String.prototype.replace.call(s, reEscape, fnEscape)
-  });
-})();
+const ESCAPE_REGEX = /[&<>'"]/g;
+const ESCAPE_ENTITY = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&#39;',
+  '"': '&quot;',
+  '`': '&#x60;'
+};
+const ESCAPE_FUNCTION = entity => ESCAPE_ENTITY[entity];
 
 let buffer = new Uint8Array(0);
 let offset = 0;
@@ -143,17 +137,10 @@ const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
     '';
 };
 
-// Tagged template function
-function escapeHtml(pieces) {
-  let result = pieces[0];
-  const substitutions = [].slice.call(arguments, 1);
+const escape = (string) => string.replace(ESCAPE_REGEX, ESCAPE_FUNCTION);
 
-  substitutions.forEach((elem, i) => {
-    result += util.escape(elem) + pieces[i + 1];
-  });
-
-  return result;
-}
+const escapeHtml = ([result, ...strings], ...values) => values
+  .reduce((result, value, index) => `${result}${escape(value)}${strings[index]}`, result);
 
 const toHtml = (index, metadata) => {
   const lines = decode(chunks[index]);
@@ -165,10 +152,11 @@ const toHtml = (index, metadata) => {
 
     return `<p${pClass}><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
       const className = getAnsiClasses(part);
+      const html = escapeHtml`${part.text}`;
       
       return className ?
-        escapeHtml`<span class="${className}">${part.text}</span>` :
-        escapeHtml`<span>${part.text}</span>`;
+        `<span class="${className}">${html}</span>` :
+        `<span>${html}</span>`;
       }).join('')}</p>`;
   }).join('');
 
