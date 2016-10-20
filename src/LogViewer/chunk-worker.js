@@ -2,7 +2,7 @@ import parseAnsi from '../util/ansi-parse';
 
 const CLEAR_ANSI = /(?:\033)(?:\[0?c|\[[0356]n|\[7[lh]|\[\?25[lh]|\(B|H|\[(?:\d+(;\d+){,2})?G|\[(?:[12])?[JK]|[DM]|\[0K)/gm;
 const CONTROL_CHARS = /\033\[1000D/gm;
-const NORMALIZE_NEWLINES = /\r+\n/gm;
+const NORMALIZE_NEWLINES = /\r+[\n]?/gm;
 const NEWLINE = /^/gm;
 const ENCODED_CARRIAGERETURN = 13;
 const MIN_LINE_HEIGHT = 19;
