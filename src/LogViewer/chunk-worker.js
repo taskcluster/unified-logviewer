@@ -8,8 +8,19 @@ const ENCODED_CARRIAGERETURN = 13;
 const MIN_LINE_HEIGHT = 19;
 const LINE_CHUNK = 1000;
 const DECODER = new TextDecoder('utf-8');
+const ENCODER = new TextEncoder('utf-8');
 // Setting a hard limit on lines since browser have trouble with heights starting at around 16.7 million pixels and up
 const CHUNK_LIMIT = 883000 / LINE_CHUNK;
+const ESCAPE_REGEX = /[&<>'"]/g;
+const ESCAPE_ENTITY = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&#39;',
+  '"': '&quot;',
+  '`': '&#x60;'
+};
+const ESCAPE_FUNCTION = entity => ESCAPE_ENTITY[entity];
 
 let buffer = new Uint8Array(0);
 let offset = 0;
@@ -53,16 +64,78 @@ export const decode = (chunk) => {
     .map(parseAnsi);
 };
 
-const init = (url) => {
+const request = (url, asBuffer = true) => new Promise((resolve, reject) => {
+  // Abort in 10 seconds
   const xhr = new XMLHttpRequest();
 
   xhr.open('GET', url);
-  xhr.responseType = 'arraybuffer';
+
+  // Abort in 10 seconds if we can't handle an array buffer response
+  // Abort in 60 seconds for other failure
+  const timeout = setTimeout(() => {
+    clean(timeout);
+    reject(xhr);
+  }, asBuffer ? 10000 : 60000);
+
+  const clean = (timeout) => {
+    clearTimeout(timeout);
+    xhr.removeEventListener('progress', handle);
+    xhr.removeEventListener('load', handle);
+  };
+
+  const handle = () => {
+    if (xhr.response) {
+      clean(timeout);
+      resolve(xhr);
+    }
+  };
+
   xhr.overrideMimeType('text/plain; charset=utf-8');
-  xhr.addEventListener('error', error);
-  xhr.addEventListener('progress', () => xhr.response && update(xhr.response));
-  xhr.addEventListener('load', () => xhr.response && (update(xhr.response) || loadEnd()));
+  xhr.addEventListener('progress', handle);
+  xhr.addEventListener('load', handle);
+  xhr.addEventListener('error', () => {
+    clean(timeout);
+    reject(xhr);
+  });
+
+  if (asBuffer) {
+    xhr.responseType = 'arraybuffer';
+  }
+
   xhr.send();
+});
+
+const init = (url) => {
+  request(url)
+    .then(xhr => {
+      if (xhr.response) {
+        update(xhr.response);
+        loadEnd();
+      }
+    })
+    .catch(xhr => {
+      xhr && xhr.abort && xhr.abort();
+
+      request(url, false)
+        .then(xhr => {
+          xhr.addEventListener('error', error);
+          xhr.addEventListener('progress', () => {
+            if (xhr.response) {
+              update(ENCODER.encode(xhr.response));
+            }
+          });
+          xhr.addEventListener('load', () => {
+            if (xhr.response) {
+              update(ENCODER.encode(xhr.response));
+              loadEnd();
+            }
+          });
+        })
+        .catch(xhr => {
+          xhr && xhr.abort && xhr.abort();
+          error();
+        });
+    })
 };
 
 const update = (response) => {
@@ -127,6 +200,11 @@ const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
     '';
 };
 
+const escape = (string) => string.replace(ESCAPE_REGEX, ESCAPE_FUNCTION);
+
+const escapeHtml = ([result, ...strings], ...values) => values
+  .reduce((result, value, index) => `${result}${escape(value)}${strings[index]}`, result);
+
 const toHtml = (index, metadata) => {
   const lines = decode(chunks[index]);
   const start = LINE_CHUNK * index + offset + 1;
@@ -137,10 +215,11 @@ const toHtml = (index, metadata) => {
 
     return `<p${pClass}><a id="${lineNumber}">${lineNumber}</a>${parts.map((part) => {
       const className = getAnsiClasses(part);
+      const html = escapeHtml`${part.text}`;
       
       return className ?
-        `<span class="${className}">${part.text}</span>` :
-        `<span>${part.text}</span>`;
+        `<span class="${className}">${html}</span>` :
+        `<span>${html}</span>`;
       }).join('')}</p>`;
   }).join('');
 
