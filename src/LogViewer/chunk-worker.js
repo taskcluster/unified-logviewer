@@ -4,7 +4,7 @@ const CLEAR_ANSI = /(?:\033)(?:\[0?c|\[[0356]n|\[7[lh]|\[\?25[lh]|\(B|H|\[(?:\d+
 const CONTROL_CHARS = /\033\[1000D/gm;
 const NORMALIZE_NEWLINES = /\r+\n/gm;
 const NEWLINE = /^/gm;
-const ENCODED_NEWLINE = 10;
+const ENCODED_CARRIAGERETURN = 13;
 const MIN_LINE_HEIGHT = 19;
 const LINE_CHUNK = 1000;
 const DECODER = new TextDecoder('utf-8');
@@ -82,7 +82,7 @@ const update = (response) => {
   chunkHeights = [];
 
   for (let index = 0; index < bufferLength; index++) {
-    if (buffer[index] === ENCODED_NEWLINE) {
+    if (buffer[index] === ENCODED_CARRIAGERETURN) {
       newlineCount++;
     }
 
