@@ -75,6 +75,14 @@ export default class LogViewer extends React.Component {
     }
   }
 
+  highlightError(css) {
+    const style = document.createElement('style');
+
+    style.appendChild(document.createTextNode(''));
+    document.head.appendChild(style);
+    style.sheet.insertRule(css, 0);
+  }
+
   request() {
     const { url } = this.state;
 
@@ -106,6 +114,17 @@ export default class LogViewer extends React.Component {
   handleMessage(e) {
     if (e.data && typeof e.data === 'object') {
       this.setState({ data: e.data });
+
+      Object.keys(e.data).forEach((name) => {
+        switch(name) {
+          case 'highlightError':
+            return this.highlightError(e.data.highlightError);
+          case 'lineNumber':
+            return this.jumpToLine(e.data.lineNumber);
+          case 'highlightStart':
+            return this.setState({ highlightStart: e.data.highlightStart, highlightEnd: e.data.highlightEnd });
+        }
+      });
     }
   }
 
