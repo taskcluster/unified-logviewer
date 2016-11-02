@@ -115,7 +115,7 @@ export default class LogViewer extends React.Component {
     if (e.data && typeof e.data === 'object') {
       this.setState({ data: e.data });
 
-      Object.keys(e.data).forEach((name) => {
+      Object.keys(e.data).forEach(name => {
         switch(name) {
           case 'highlightError':
             return this.highlightError(e.data.highlightError);
