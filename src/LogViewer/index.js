@@ -57,6 +57,7 @@ export default class LogViewer extends React.Component {
       jumpToHighlight: nextState.jumpToHighlight
     });
 
+    parent.postMessage(parse(qs), '*');
     history.pushState(null, '', `${location.origin}${location.pathname}?${qs}`);
   }
 
