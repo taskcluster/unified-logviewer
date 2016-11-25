@@ -339,7 +339,7 @@ export default class LogViewer extends React.Component {
         {<Helmet style={[{ cssText: helmetStyle }]} />}
 
         <div id="log-container">
-          <code id="log"  className={className} onClick={e => this.handleDelegation(e)}>
+          <code id="log" className={className} onClick={e => this.handleDelegation(e)}>
             {this.renderChunks()}
           </code>
         </div>
