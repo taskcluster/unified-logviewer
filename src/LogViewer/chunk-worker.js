@@ -6,7 +6,6 @@ const NORMALIZE_NEWLINES = /\r[\n]?/gm;
 const NEWLINE = /^/gm;
 const ENCODED_CARRIAGERETURN = 13;
 const ENCODED_NEWLINE = 10;
-const MIN_LINE_HEIGHT = 19;
 const LINE_CHUNK = 1000;
 const DECODER = new TextDecoder('utf-8');
 const ENCODER = new TextEncoder('utf-8');
@@ -106,18 +105,18 @@ const request = (url, asBuffer = true) => new Promise((resolve, reject) => {
   xhr.send();
 });
 
-const init = (url, useBuffer = true) => {
+const init = (url, useBuffer = true, lineHeight) => {
   const textRequest = () => request(url, false)
     .then(xhr => {
       xhr.addEventListener('error', error);
       xhr.addEventListener('progress', () => {
         if (xhr.response) {
-          update(ENCODER.encode(xhr.response));
+          update(ENCODER.encode(xhr.response), lineHeight);
         }
       });
       xhr.addEventListener('load', () => {
         if (xhr.response) {
-          update(ENCODER.encode(xhr.response));
+          update(ENCODER.encode(xhr.response), lineHeight);
           loadEnd();
         }
       });
@@ -134,7 +133,7 @@ const init = (url, useBuffer = true) => {
   request(url)
     .then(xhr => {
       if (xhr.response) {
-        update(xhr.response);
+        update(xhr.response, lineHeight);
         loadEnd();
       }
     })
@@ -144,7 +143,7 @@ const init = (url, useBuffer = true) => {
     });
 };
 
-const update = (response) => {
+const update = (response, lineHeight) => {
   const _buffer = new Uint8Array(response);
   const bufferLength = _buffer.length;
 
@@ -174,7 +173,7 @@ const update = (response) => {
     }
 
     chunks.push(buffer.slice(nextSliceIndex, index));
-    chunkHeights.push(LINE_CHUNK * MIN_LINE_HEIGHT);
+    chunkHeights.push(LINE_CHUNK * lineHeight);
     lineCounts.push(newlineCount);
 
     nextSliceIndex = buffer[index] === ENCODED_CARRIAGERETURN && buffer[index + 1] === ENCODED_NEWLINE ?
@@ -187,7 +186,7 @@ const update = (response) => {
   // Add any remaining lines that didn't fit into the exact slices
   if (nextSliceIndex < bufferLength) {
     chunks.push(buffer.slice(nextSliceIndex, bufferLength));
-    chunkHeights.push(newlineCount * MIN_LINE_HEIGHT);
+    chunkHeights.push(newlineCount * lineHeight);
     lineCounts.push(newlineCount);
   }
 
@@ -202,7 +201,7 @@ const update = (response) => {
     lineCounts = lineCounts.slice(overage);
   }
 
-  self.postMessage(JSON.stringify({ type: 'update', chunkHeights, offset, minLineHeight: MIN_LINE_HEIGHT }));
+  self.postMessage(JSON.stringify({ type: 'update', chunkHeights, offset }));
 };
 
 const error = () => self.postMessage(JSON.stringify({ type: 'error' }));
@@ -246,7 +245,7 @@ self.addEventListener('message', (e) => {
 
     switch (data.type) {
       case 'start':
-        return init(data.url, data.useBuffer);
+        return init(data.url, data.useBuffer, data.lineHeight);
       case 'decode-index':
         return toHtml(data.index, data.metadata);
     }
