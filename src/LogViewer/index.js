@@ -294,7 +294,7 @@ export default class LogViewer extends React.Component {
   render() {
     const { isLoading, error, toolbarOpen, showLineNumbers, wrapLines, followLog, lineHeight, customStyle } = this.state;
     const lineStyle = `#log p{min-height:${lineHeight}px}#log{line-height:${lineHeight}px}`;
-    const helmetStyle = customStyle ? customStyle + lineStyle : lineStyle;
+    const cssText = customStyle ? customStyle + lineStyle : lineStyle;
 
     if (error) {
       return (
@@ -329,7 +329,7 @@ export default class LogViewer extends React.Component {
 
     return (
       <div>
-        {<Helmet style={[{ cssText: helmetStyle }]} />}
+        {<Helmet style={[{ cssText }]} />}
 
         <div id="log-container">
           <code id="log" className={className} onClick={e => this.handleDelegation(e)}>
