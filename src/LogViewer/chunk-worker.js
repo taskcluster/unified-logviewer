@@ -27,6 +27,7 @@ let offset = 0;
 let chunks = [];
 let chunkHeights = [];
 let lineCounts = [];
+let lineHeight = 19;
 
 export const getAnsiClasses = (part) => {
   const colors = [];
@@ -105,18 +106,18 @@ const request = (url, asBuffer = true) => new Promise((resolve, reject) => {
   xhr.send();
 });
 
-const init = (url, useBuffer = true, lineHeight) => {
+const init = (url, useBuffer = true) => {
   const textRequest = () => request(url, false)
     .then(xhr => {
       xhr.addEventListener('error', error);
       xhr.addEventListener('progress', () => {
         if (xhr.response) {
-          update(ENCODER.encode(xhr.response), lineHeight);
+          update(ENCODER.encode(xhr.response));
         }
       });
       xhr.addEventListener('load', () => {
         if (xhr.response) {
-          update(ENCODER.encode(xhr.response), lineHeight);
+          update(ENCODER.encode(xhr.response));
           loadEnd();
         }
       });
@@ -133,7 +134,7 @@ const init = (url, useBuffer = true, lineHeight) => {
   request(url)
     .then(xhr => {
       if (xhr.response) {
-        update(xhr.response, lineHeight);
+        update(xhr.response);
         loadEnd();
       }
     })
@@ -143,7 +144,7 @@ const init = (url, useBuffer = true, lineHeight) => {
     });
 };
 
-const update = (response, lineHeight) => {
+const update = (response) => {
   const _buffer = new Uint8Array(response);
   const bufferLength = _buffer.length;
 
@@ -201,7 +202,7 @@ const update = (response, lineHeight) => {
     lineCounts = lineCounts.slice(overage);
   }
 
-  self.postMessage(JSON.stringify({ type: 'update', chunkHeights, offset }));
+  self.postMessage(JSON.stringify({ type: 'update', chunkHeights, offset, lineHeight }));
 };
 
 const error = () => self.postMessage(JSON.stringify({ type: 'error' }));
@@ -245,7 +246,11 @@ self.addEventListener('message', (e) => {
 
     switch (data.type) {
       case 'start':
-        return init(data.url, data.useBuffer, data.lineHeight);
+        if (data.lineHeight) {
+          lineHeight = data.lineHeight
+        }
+
+        return init(data.url, data.useBuffer);
       case 'decode-index':
         return toHtml(data.index, data.metadata);
     }

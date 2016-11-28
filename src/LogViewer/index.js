@@ -22,7 +22,6 @@ export default class LogViewer extends React.Component {
     super(props);
 
     const qs = parse(location.search.substr(1));
-    const DEFAULT_LINE_HEIGHT = 19;
 
     this.state = {
       ...qs,
@@ -31,7 +30,7 @@ export default class LogViewer extends React.Component {
       jumpToHighlight: qs.jumpToHighlight === 'true',
       followLog: qs.followLog === 'true',
       asText: qs.asText === 'true',
-      lineHeight: qs.lineHeight || DEFAULT_LINE_HEIGHT,
+      lineHeight: qs.lineHeight,
       isLoading: true,
       chunkHeights: [],
       offset: 0,
@@ -144,8 +143,8 @@ export default class LogViewer extends React.Component {
     }
   }
 
-  handleContainerUpdate({ offset, chunkHeights }) {
-    this.setState({ offset, chunkHeights, isLoading: false });
+  handleContainerUpdate({ offset, chunkHeights, lineHeight }) {
+    this.setState({ offset, chunkHeights, isLoading: false, lineHeight });
   }
 
   handleDelegation(event) {
@@ -293,13 +292,9 @@ export default class LogViewer extends React.Component {
   }
 
   render() {
-    const { isLoading, error, toolbarOpen, showLineNumbers, wrapLines, followLog, lineHeight } = this.state;
-
-    const lineStyle = () => {
-      const height = lineHeight ? lineHeight : 19;
-
-      return `#log p{min-height:${height}px}#log{line-height:${height}px}`;
-    };
+    const { isLoading, error, toolbarOpen, showLineNumbers, wrapLines, followLog, lineHeight, customStyle } = this.state;
+    const lineStyle = `#log p{min-height:${lineHeight}px}#log{line-height:${lineHeight}px}`;
+    const helmetStyle = customStyle ? customStyle + lineStyle : lineStyle;
 
     if (error) {
       return (
@@ -331,8 +326,6 @@ export default class LogViewer extends React.Component {
     if (wrapLines) {
       className += ' wrap-lines';
     }
-
-    const helmetStyle = this.state.customStyle ? this.state.customStyle + lineStyle() : lineStyle();
 
     return (
       <div>
