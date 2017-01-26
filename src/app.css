@@ -196,16 +196,16 @@ i {
 #log.wrap-lines {
   white-space: pre-wrap;
 }
-#log.show-line-numbers p a {
+#log.show-line-numbers .line a {
   display: inline-block;
 }
-#log p {
+#log .line {
   position: relative;
   display: flex;
   padding: 0 15px 0 55px;
   margin: 0;
 }
-#log p > a {
+#log .line > a {
   align-items: stretch;
 }
 #log .highlight {
@@ -214,10 +214,10 @@ i {
 #log .highlight a {
   color: white;
 }
-#log p:hover {
+#log .line:hover {
   background-color: #444;
 }
-#log p a {
+#log .line a {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
