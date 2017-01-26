@@ -208,10 +208,10 @@ i {
 #log p > a {
   align-items: stretch;
 }
-#log p.highlight {
+#log .highlight {
   background-color: #666;
 }
-#log p.highlight a {
+#log .highlight a {
   color: white;
 }
 #log p:hover {

@@ -210,8 +210,8 @@ const loadEnd = () => self.postMessage(JSON.stringify({ type: 'loadend' }));
 
 const getParagraphClass = (lineNumber, { highlightStart, highlightEnd }) => {
   return lineNumber >= highlightStart && lineNumber <= highlightEnd ?
-    ' class="highlight"' :
-    '';
+    ' class="line highlight"' :
+    ' class="line"';
 };
 
 const escape = (string) => string.replace(ESCAPE_REGEX, ESCAPE_FUNCTION);
