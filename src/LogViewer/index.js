@@ -278,7 +278,7 @@ export default class LogViewer extends React.Component {
   jumpToLine(lineNumber) {
     const { offset, lineHeight } = this.state;
 
-    window.scrollTo(0, (lineNumber - offset) * lineHeight + 35);
+    window.scrollTo(0, (lineNumber - offset) * lineHeight);
     this.setState({ didLineJump: true });
   }
 
