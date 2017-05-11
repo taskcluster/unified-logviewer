@@ -109,6 +109,11 @@ const request = (url, asBuffer = true) => new Promise((resolve, reject) => {
 const init = (url, useBuffer = true) => {
   const textRequest = () => request(url, false)
     .then(xhr => {
+      if (xhr.response) {
+        // update with any information that was dropped between progress events
+        update(ENCODER.encode(xhr.response));
+      }
+
       xhr.addEventListener('error', error);
       xhr.addEventListener('progress', () => {
         if (xhr.response) {
